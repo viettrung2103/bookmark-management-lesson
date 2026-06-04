@@ -1,0 +1,30 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API for bookmark management",
+        "title": "Bookmark API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/genpass": {
+            "get": {
+                "description": "Generate a new password",
+                "tags": [
+                    "password"
+                ],
+                "summary": "Generate a new password",
+                "responses": {
+                    "200": {
+                        "description": "12345678",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

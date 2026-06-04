@@ -1,0 +1,20 @@
+basePath: /
+host: localhost:8080
+info:
+  contact: {}
+  description: API for bookmark management
+  title: Bookmark API
+  version: "1.0"
+paths:
+  /genpass:
+    get:
+      description: Generate a new password
+      responses:
+        "200":
+          description: "12345678"
+          schema:
+            type: string
+      summary: Generate a new password
+      tags:
+      - password
+swagger: "2.0"
