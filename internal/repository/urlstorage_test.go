@@ -44,7 +44,7 @@ func TestUrlStorage_StoreUrl(t *testing.T) {
 			redisMock := tc.setupMock()
 			testRepo := NewUrlStorage(redisMock)
 
-			err := testRepo.StoreURL(ctx, "1234567", "https://google.com")
+			err := testRepo.StoreURL(ctx, "1234567", "https://google.com", 100)
 			assert.Equal(t, tc.expectErr, err)
 			if err == nil {
 				tc.verifyFunc(ctx, redisMock)

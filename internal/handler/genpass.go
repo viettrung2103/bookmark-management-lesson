@@ -31,10 +31,7 @@ func NewGenPass(genPassSvc service.GenPass) GenPass {
 // @Success 200 {object} string "12345678"
 // @Router /genpass [get]
 func (s *genPassHandler) GeneratePassword(c *gin.Context) {
-	pass, err := s.genPassService.GeneratePassword(passwordLength)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Err"})
-		return
-	}
+	pass := s.genPassService.GeneratePassword()
+	
 	c.JSON(http.StatusOK, gin.H{"password": pass})
 }

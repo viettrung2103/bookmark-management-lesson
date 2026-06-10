@@ -33,27 +33,12 @@ func TestGenPassHandler_GeneratePassword(t *testing.T) {
 			},
 			setupMockService: func(ctx context.Context) *mocks.GenPass {
 				serviceMock := mocks.NewGenPass(t)
-				serviceMock.On("GeneratePassword", passwordLength).Return("123456789012", nil)
+				serviceMock.On("GeneratePassword").Return("123456789012")
 				return serviceMock
 			},
 
 			expectedStatus:   http.StatusOK,
 			expectedResponse: `{"password":"123456789012"}`,
-		},
-		{
-			name: "service failed",
-
-			setupRequest: func(ctx *gin.Context) {
-				ctx.Request = httptest.NewRequest(http.MethodGet, "/genpass", nil)
-			},
-			setupMockService: func(ctx context.Context) *mocks.GenPass {
-				serviceMock := mocks.NewGenPass(t)
-				serviceMock.On("GeneratePassword", passwordLength).Return("", testErr)
-				return serviceMock
-			},
-
-			expectedStatus:   http.StatusInternalServerError,
-			expectedResponse: `{"error":"Internal Server Err"}`,
 		},
 	}
 

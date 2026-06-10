@@ -1,6 +1,10 @@
 package main
 
-import "github.com/viettrung2103/bookmark-management-lesson/internal/api"
+import (
+	"github.com/viettrung2103/bookmark-management-lesson/internal/api"
+	"github.com/viettrung2103/bookmark-management-lesson/pkg/logger"
+	redis2 "github.com/viettrung2103/bookmark-management-lesson/pkg/redis"
+)
 
 // @title Bookmark API
 // @version 1.0
@@ -8,12 +12,18 @@ import "github.com/viettrung2103/bookmark-management-lesson/internal/api"
 // @host localhost:8080
 // @BasePath /
 func main() {
+	logger.SetLogLevel()
 	//create app config
 	cfg, err := api.NewConfig()
 	if err != nil {
 		panic(err)
 	}
-	app := api.NewEngine(cfg)
+	redis, err := redis2.NewClient("")
+	if err != nil {
+		panic(err)
+	}
+
+	app := api.NewEngine(cfg, redis)
 	err = app.Start()
 	if err != nil {
 		panic(err)

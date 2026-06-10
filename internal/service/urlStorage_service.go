@@ -2,42 +2,87 @@ package service
 
 import (
 	"context"
+	"errors"
+	"time"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/viettrung2103/bookmark-management-lesson/internal/repository"
-	"github.com/viettrung2103/bookmark-management-lesson/pkg/stringutils"
+	"github.com/viettrung2103/bookmark-management-lesson/pkg/utils"
 )
+
+//go:generate mockery --name=ShortenUrl --filename=shortenurl.go
+
+// ShortenUrl represents the shorten url service
+type ShortenUrl interface {
+	ShortenUrl(ctx context.Context, url string, exp int64) (string, error)
+	GetLinkFromCode(ctx context.Context, urlCode string) (string, error)
+	GetURL(ctx context.Context, urlCode string) (string, error)
+}
+
+type shortenUrlService struct {
+	repo   repository.UrlStorage
+	keygen utils.KeyGenerator
+}
+
+// NewShortenUrl returns a new ShortenUrl
+func NewShortenUrl(repo repository.UrlStorage, keygen utils.KeyGenerator) ShortenUrl {
+	return &shortenUrlService{
+		repo:   repo,
+		keygen: keygen,
+	}
+}
 
 const (
 	urlCodeLength = 7
 )
 
-// ShortenUrl represents the shorten url service
-type ShortenUrl interface {
-	ShortenUrl(ctx context.Context, url string) (string, error)
-}
-
-type shortenUrl struct {
-	repo repository.UrlStorage
-}
-
-// NewShortenUrl returns a new ShortenUrl
-func NewShortenUrl(repo repository.UrlStorage) ShortenUrl {
-	return &shortenUrl{repo: repo}
-}
-
 // ShortenUrl shortens a url
-func (s *shortenUrl) ShortenUrl(ctx context.Context, url string) (string, error) {
+func (s *shortenUrlService) ShortenUrl(ctx context.Context, url string, exp int64) (string, error) {
 	// tao key
-	urlCode, err := stringutils.GenerateCode(urlCodeLength)
+	key := s.keygen.GenerateKey(urlCodeLength)
+
+	res, err := s.repo.GetURL(ctx, key)
+
+	if err != nil && !errors.Is(err, redis.Nil) {
+		return "", err
+	}
+
+	if res != "" {
+		return s.ShortenUrl(ctx, url, exp)
+	}
+
+	// put key into redis
+	err = s.repo.StoreURL(ctx, key, url, time.Duration(exp)*time.Second)
 	if err != nil {
 		return "", err
 	}
-	// add vao repo
-	err = s.repo.StoreURL(ctx, urlCode, url)
-	if err != nil {
-		return "", nil
+	return key, nil
+}
+
+var ErrCodeDoesNotExist = errors.New("code does not exist")
+
+func (s *shortenUrlService) GetLinkFromCode(ctx context.Context, urlCode string) (string, error) {
+	url, err := s.repo.GetURL(ctx, urlCode)
+	if errors.Is(err, redis.Nil) {
+		return "", ErrCodeDoesNotExist
 	}
 
-	// tra ve key
-	return urlCode, nil
+	return url, err
+}
+
+var (
+	UrlNotFound = errors.New("url not found")
+)
+
+func (s *shortenUrlService) GetURL(ctx context.Context, urlCode string) (string, error) {
+	// call repo to get url
+	url, err := s.repo.GetURL(ctx, urlCode)
+	if err == nil {
+		if errors.Is(err, redis.Nil) {
+			return "", UrlNotFound
+		}
+	}
+
+	return url, err
+
 }

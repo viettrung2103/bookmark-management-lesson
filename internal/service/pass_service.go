@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/viettrung2103/bookmark-management-lesson/pkg/stringutils"
+	"github.com/viettrung2103/bookmark-management-lesson/pkg/utils"
 )
 
 const (
@@ -9,23 +9,25 @@ const (
 	passLength = 10
 )
 
-type passwordService struct{}
+type genPassService struct {
+	keygen utils.KeyGenerator
+}
 
 // GenPass represents the genpass service
 //
 //go:generate mockery --name=GenPass --filename=genpass.go
-type Password interface {
-	GeneratePassword() (string, error)
+type GenPass interface {
+	GeneratePassword() string
 }
 
 // NewGenPass return a GenPassService
-func NewPassword() Password {
-	return &passwordService{}
+func NewGenPass() GenPass {
+	return &genPassService{}
 }
 
 // GeneratePassword generates a random password
-func (s *passwordService) GeneratePassword() (string, error) {
+func (s *genPassService) GeneratePassword() string {
 
-	return stringutils.GenerateCode(passLength)
+	return utils.GenerateRandomString(passLength)
 
 }
