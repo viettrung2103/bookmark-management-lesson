@@ -11,9 +11,9 @@ dev-run: swagger run
 COVERAGE_EXCLUDE=mocks|main.go|test|pkg
 COVERAGE_THRESHOLD = 50
 
-test:
+est:
 	$(eval COVER_PKGS := $(shell go list ./... | grep -vE "cmd|docs|mocks" | tr '\n' ',' | sed 's/,$$//'))
-	$(eval TEST_PKGS := $(shell go list ./... | grep -vE "cmd|docs|mocks"))
+	$(eval TEST_PKGS  := $(shell go list -f '{{if .TestGoFiles}}{{.ImportPath}}{{end}}' ./... | grep -vE "cmd|docs|mocks"))
 	go test $(TEST_PKGS) -coverprofile=coverage.tmp -covermode=atomic -coverpkg=$(COVER_PKGS) -p 1
 	grep -vE "$(COVERAGE_EXCLUDE)" coverage.tmp > coverage.out
 	go tool cover -html=coverage.out -o coverage.html
