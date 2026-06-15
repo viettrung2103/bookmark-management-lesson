@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/viettrung2103/bookmark-management-lesson/internal/api"
 	"github.com/viettrung2103/bookmark-management-lesson/pkg/logger"
-	redis2 "github.com/viettrung2103/bookmark-management-lesson/pkg/redis"
+	pkgRedis "github.com/viettrung2103/bookmark-management-lesson/pkg/redis"
 )
 
 // @title Bookmark API
@@ -18,7 +18,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	redis, err := redis2.NewClient("")
+	redis, err := pkgRedis.NewClient("")
 	if err != nil {
 		panic(err)
 	}
