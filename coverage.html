@@ -3,7 +3,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<title>api: Go Coverage Report</title>
+		<title>handler: Go Coverage Report</title>
 		<style>
 			body {
 				background: black;
@@ -55,25 +55,21 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/viettrung2103/bookmark-management-lesson/internal/api/api.go (95.0%)</option>
+				<option value="file0">github.com/viettrung2103/bookmark-management-lesson/internal/handler/genpass.go (100.0%)</option>
 				
-				<option value="file1">github.com/viettrung2103/bookmark-management-lesson/internal/api/config.go (0.0%)</option>
+				<option value="file1">github.com/viettrung2103/bookmark-management-lesson/internal/handler/healthcheck.go (0.0%)</option>
 				
-				<option value="file2">github.com/viettrung2103/bookmark-management-lesson/internal/handler/genpass.go (100.0%)</option>
+				<option value="file2">github.com/viettrung2103/bookmark-management-lesson/internal/handler/shortenurl.go (27.3%)</option>
 				
-				<option value="file3">github.com/viettrung2103/bookmark-management-lesson/internal/handler/healthcheck.go (14.3%)</option>
+				<option value="file3">github.com/viettrung2103/bookmark-management-lesson/internal/repository/healthcheck_repo.go (0.0%)</option>
 				
-				<option value="file4">github.com/viettrung2103/bookmark-management-lesson/internal/handler/shortenurl.go (27.3%)</option>
+				<option value="file4">github.com/viettrung2103/bookmark-management-lesson/internal/repository/urlstorage.go (66.7%)</option>
 				
-				<option value="file5">github.com/viettrung2103/bookmark-management-lesson/internal/repository/healthcheck_repo.go (50.0%)</option>
+				<option value="file5">github.com/viettrung2103/bookmark-management-lesson/internal/service/healthcheck_service.go (0.0%)</option>
 				
-				<option value="file6">github.com/viettrung2103/bookmark-management-lesson/internal/repository/urlstorage.go (66.7%)</option>
+				<option value="file6">github.com/viettrung2103/bookmark-management-lesson/internal/service/pass_service.go (100.0%)</option>
 				
-				<option value="file7">github.com/viettrung2103/bookmark-management-lesson/internal/service/healthcheck_service.go (50.0%)</option>
-				
-				<option value="file8">github.com/viettrung2103/bookmark-management-lesson/internal/service/pass_service.go (100.0%)</option>
-				
-				<option value="file9">github.com/viettrung2103/bookmark-management-lesson/internal/service/urlStorage_service.go (60.0%)</option>
+				<option value="file7">github.com/viettrung2103/bookmark-management-lesson/internal/service/urlStorage_service.go (60.0%)</option>
 				
 				</select>
 			</div>
@@ -96,109 +92,7 @@
 		</div>
 		<div id="content">
 		
-		<pre class="file" id="file0" style="display: none">package api
-
-import (
-        "fmt"
-        "net/http"
-
-        "github.com/gin-gonic/gin"
-        "github.com/redis/go-redis/v9"
-        swaggerFiles "github.com/swaggo/files"
-        ginSwagger "github.com/swaggo/gin-swagger"
-        "github.com/viettrung2103/bookmark-management-lesson/docs"
-        "github.com/viettrung2103/bookmark-management-lesson/internal/repository"
-        "github.com/viettrung2103/bookmark-management-lesson/pkg/utils"
-
-        _ "github.com/viettrung2103/bookmark-management-lesson/docs"
-        "github.com/viettrung2103/bookmark-management-lesson/internal/handler"
-        "github.com/viettrung2103/bookmark-management-lesson/internal/service"
-)
-
-// Engine represents the application engine
-type Engine interface {
-        Start() error
-        ServeHTTP(w http.ResponseWriter, req *http.Request)
-}
-
-type engine struct {
-        app   *gin.Engine
-        cfg   *Config
-        redis *redis.Client
-}
-
-// NewEngine creates a new engine
-func NewEngine(cfg *Config, redis *redis.Client) Engine <span class="cov10" title="2">{
-        app := &amp;engine{
-                app:   gin.Default(),
-                cfg:   cfg,
-                redis: redis,
-        }
-        app.initRoutes()
-
-        return app
-}</span>
-
-// Start starts the engine
-func (e *engine) Start() error <span class="cov0" title="0">{
-        return e.app.Run(fmt.Sprintf(":%s", e.cfg.AppPort))
-}</span>
-
-// ServeHTTP implements the http.Handler interface to handle HTTP requests, to serve a specific request for testing purpose
-func (e *engine) ServeHTTP(w http.ResponseWriter, req *http.Request) <span class="cov10" title="2">{
-        e.app.ServeHTTP(w, req)
-}</span>
-
-// initRoutes initializes the routes
-func (e *engine) initRoutes() <span class="cov10" title="2">{
-        // genpass svc, handle and route
-        genPassSvc := service.NewGenPass()
-        genPassHandler := handler.NewGenPass(genPassSvc)
-
-        keyGen := utils.NewKeyGenerator()
-        shortenUrlRepo := repository.NewUrlStorage(e.redis)
-        shortenUrlSvc := service.NewShortenUrl(shortenUrlRepo, keyGen)
-        shortenUrlHandler := handler.NewShortenUrlHandler(shortenUrlSvc)
-
-        healthCheckRepo := repository.NewHealthCheck(e.redis)
-        healthCheckSvc := service.NewHealthCheck(healthCheckRepo)
-
-        healthCheckHandler := handler.NewHealthCheck(healthCheckSvc)
-
-        e.app.GET("/genpass", genPassHandler.GeneratePassword)
-        e.app.GET("/health-check", healthCheckHandler.CheckHealth)
-
-        //int swagger routes
-        docs.SwaggerInfo.Host = e.cfg.Hostname
-        e.app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-        e.app.POST("/v1/links/shorten", shortenUrlHandler.ShortenUrl)
-        e.app.GET("/v1/links/shorten/:code", shortenUrlHandler.Redirect)
-}</span>
-</pre>
-		
-		<pre class="file" id="file1" style="display: none">package api
-
-import "github.com/kelseyhightower/envconfig"
-
-type Config struct {
-        AppPort     string `default:"8080" envconfig:"APP_PORT"`
-        ServiceName string `default:"bookmark_service" envconfig:"SERVICE_NAME"`
-        InstanceId  string `default:"" envconfig:"INSTANCE_ID"`
-        Hostname    string `default:"localhost:8080" envconfig:"APP_HOSTNAME"`
-}
-
-func NewConfig() (*Config, error) <span class="cov0" title="0">{
-        cfg := &amp;Config{}
-        err := envconfig.Process("api", cfg)
-        if err != nil </span><span class="cov0" title="0">{
-                return nil, err
-        }</span>
-        <span class="cov0" title="0">return cfg, err</span>
-}
-</pre>
-		
-		<pre class="file" id="file2" style="display: none">package handler
+		<pre class="file" id="file0" style="display: none">package handler
 
 import (
         "net/http"
@@ -218,7 +112,7 @@ type genPassHandler struct {
 }
 
 // NewGenPass creates a new genpass handler
-func NewGenPass(genPassSvc service.GenPass) GenPass <span class="cov10" title="3">{
+func NewGenPass(genPassSvc service.GenPass) GenPass <span class="cov8" title="1">{
         return &amp;genPassHandler{
                 genPassService: genPassSvc,
         }
@@ -230,14 +124,14 @@ func NewGenPass(genPassSvc service.GenPass) GenPass <span class="cov10" title="3
 // @Tags password
 // @Success 200 {object} string "12345678"
 // @Router /genpass [get]
-func (s *genPassHandler) GeneratePassword(c *gin.Context) <span class="cov6" title="2">{
+func (s *genPassHandler) GeneratePassword(c *gin.Context) <span class="cov8" title="1">{
         pass := s.genPassService.GeneratePassword()
         
         c.JSON(http.StatusOK, gin.H{"password": pass})
 }</span>
 </pre>
 		
-		<pre class="file" id="file3" style="display: none">package handler
+		<pre class="file" id="file1" style="display: none">package handler
 
 import (
         "net/http"
@@ -255,7 +149,7 @@ type healthCheckHandler struct {
         //cfg                *config.Config
 }
 
-func NewHealthCheck(healthCheckSvc service.HealthCheck) HealthCheck <span class="cov10" title="2">{
+func NewHealthCheck(healthCheckSvc service.HealthCheck) HealthCheck <span class="cov0" title="0">{
         return &amp;healthCheckHandler{
                 healthCheckSvc: healthCheckSvc,
         }
@@ -287,7 +181,7 @@ func (h *healthCheckHandler) CheckHealth(c *gin.Context) <span class="cov0" titl
 }
 </pre>
 		
-		<pre class="file" id="file4" style="display: none">package handler
+		<pre class="file" id="file2" style="display: none">package handler
 
 import (
         "errors"
@@ -307,7 +201,7 @@ type shortenUrlHandler struct {
         shortenUrlService service.ShortenUrl
 }
 
-func NewShortenUrlHandler(shortenUrlSvc service.ShortenUrl) ShortenUrlHandler <span class="cov10" title="4">{
+func NewShortenUrlHandler(shortenUrlSvc service.ShortenUrl) ShortenUrlHandler <span class="cov10" title="2">{
         return &amp;shortenUrlHandler{
                 shortenUrlService: shortenUrlSvc,
         }
@@ -352,14 +246,14 @@ func (h *shortenUrlHandler) ShortenUrl(c *gin.Context) <span class="cov0" title=
 // @Param code path string true "code"
 // @Success        302
 // @Router /v1/links/shorten/{code} [get]
-func (h *shortenUrlHandler) Redirect(c *gin.Context) <span class="cov5" title="2">{
+func (h *shortenUrlHandler) Redirect(c *gin.Context) <span class="cov10" title="2">{
         code := c.Param("code")
         if code == "" </span><span class="cov0" title="0">{
                 c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "code is required"})
         }</span>
 
         // call service to get url from code
-        <span class="cov5" title="2">url, err := h.shortenUrlService.GetURL(c, code)
+        <span class="cov10" title="2">url, err := h.shortenUrlService.GetURL(c, code)
         if err != nil </span><span class="cov0" title="0">{
                 if errors.Is(err, service.UrlNotFound) </span><span class="cov0" title="0">{
                         c.JSON(http.StatusBadRequest, gin.H{"error": "url not found"})
@@ -371,12 +265,12 @@ func (h *shortenUrlHandler) Redirect(c *gin.Context) <span class="cov5" title="2
         }
 
         // redirect to url
-        <span class="cov5" title="2">c.Redirect(http.StatusFound, url)</span>
+        <span class="cov10" title="2">c.Redirect(http.StatusFound, url)</span>
 
 }
 </pre>
 		
-		<pre class="file" id="file5" style="display: none">package repository
+		<pre class="file" id="file3" style="display: none">package repository
 
 import (
         "context"
@@ -395,7 +289,7 @@ type healthCheckRepo struct {
 }
 
 // NewHealthCheck creates a new HealthCheck
-func NewHealthCheck(c *redis.Client) HealthCheck <span class="cov10" title="2">{
+func NewHealthCheck(c *redis.Client) HealthCheck <span class="cov0" title="0">{
         return &amp;healthCheckRepo{
                 c: c,
         }
@@ -408,7 +302,7 @@ func (s *healthCheckRepo) CheckHealth(ctx context.Context) error <span class="co
 }</span>
 </pre>
 		
-		<pre class="file" id="file6" style="display: none">package repository
+		<pre class="file" id="file4" style="display: none">package repository
 
 import (
         "context"
@@ -434,17 +328,17 @@ type urlStorage struct {
 }
 
 // NewUrlStorage creates a new UrlStorage
-func NewUrlStorage(c *redis.Client) UrlStorage <span class="cov10" title="3">{
+func NewUrlStorage(c *redis.Client) UrlStorage <span class="cov8" title="1">{
         return &amp;urlStorage{c: c}
 }</span>
 
 // StoreURL stores a URL in the cache
-func (s *urlStorage) StoreURL(ctx context.Context, code, url string, exp time.Duration) error <span class="cov1" title="1">{
+func (s *urlStorage) StoreURL(ctx context.Context, code, url string, exp time.Duration) error <span class="cov8" title="1">{
         err := s.c.Set(ctx, code, url, exp).Err()
         if err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
-        <span class="cov1" title="1">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 
 // GetURL retrieves a URL from the cache
@@ -458,7 +352,7 @@ func (s *urlStorage) GetURL(ctx context.Context, code string) (string, error) <s
 }</span>
 </pre>
 		
-		<pre class="file" id="file7" style="display: none">package service
+		<pre class="file" id="file5" style="display: none">package service
 
 import (
         "context"
@@ -478,7 +372,7 @@ type healthCheckService struct {
 }
 
 // NewHealthCheckS creates a new HealthCheck
-func NewHealthCheck(repo repository.HealthCheck) HealthCheck <span class="cov10" title="2">{
+func NewHealthCheck(repo repository.HealthCheck) HealthCheck <span class="cov0" title="0">{
         return &amp;healthCheckService{repo: repo}
 }</span>
 
@@ -488,7 +382,7 @@ func (s *healthCheckService) CheckHealth(ctx context.Context) error <span class=
 }</span>
 </pre>
 		
-		<pre class="file" id="file8" style="display: none">package service
+		<pre class="file" id="file6" style="display: none">package service
 
 import (
         "github.com/viettrung2103/bookmark-management-lesson/pkg/utils"
@@ -511,19 +405,19 @@ type GenPass interface {
 }
 
 // NewGenPass return a GenPassService
-func NewGenPass() GenPass <span class="cov10" title="3">{
+func NewGenPass() GenPass <span class="cov8" title="1">{
         return &amp;genPassService{}
 }</span>
 
 // GeneratePassword generates a random password
-func (s *genPassService) GeneratePassword() string <span class="cov6" title="2">{
+func (s *genPassService) GeneratePassword() string <span class="cov8" title="1">{
 
         return utils.GenerateRandomString(passLength)
 
 }</span>
 </pre>
 		
-		<pre class="file" id="file9" style="display: none">package service
+		<pre class="file" id="file7" style="display: none">package service
 
 import (
         "context"
@@ -550,7 +444,7 @@ type shortenUrlService struct {
 }
 
 // NewShortenUrl returns a new ShortenUrl
-func NewShortenUrl(repo repository.UrlStorage, keygen utils.KeyGenerator) ShortenUrl <span class="cov10" title="7">{
+func NewShortenUrl(repo repository.UrlStorage, keygen utils.KeyGenerator) ShortenUrl <span class="cov10" title="5">{
         return &amp;shortenUrlService{
                 repo:   repo,
                 keygen: keygen,
@@ -562,7 +456,7 @@ const (
 )
 
 // ShortenUrl shortens a url
-func (s *shortenUrlService) ShortenUrl(ctx context.Context, url string, exp int64) (string, error) <span class="cov6" title="3">{
+func (s *shortenUrlService) ShortenUrl(ctx context.Context, url string, exp int64) (string, error) <span class="cov7" title="3">{
         // tao key
         key := s.keygen.GenerateKey(urlCodeLength)
 
@@ -572,7 +466,7 @@ func (s *shortenUrlService) ShortenUrl(ctx context.Context, url string, exp int6
                 return "", err
         }</span>
 
-        <span class="cov6" title="3">if res != "" </span><span class="cov1" title="1">{
+        <span class="cov7" title="3">if res != "" </span><span class="cov1" title="1">{
                 return s.ShortenUrl(ctx, url, exp)
         }</span>
 
@@ -586,13 +480,13 @@ func (s *shortenUrlService) ShortenUrl(ctx context.Context, url string, exp int6
 
 var ErrCodeDoesNotExist = errors.New("code does not exist")
 
-func (s *shortenUrlService) GetLinkFromCode(ctx context.Context, urlCode string) (string, error) <span class="cov6" title="3">{
+func (s *shortenUrlService) GetLinkFromCode(ctx context.Context, urlCode string) (string, error) <span class="cov7" title="3">{
         url, err := s.repo.GetURL(ctx, urlCode)
         if errors.Is(err, redis.Nil) </span><span class="cov0" title="0">{
                 return "", ErrCodeDoesNotExist
         }</span>
 
-        <span class="cov6" title="3">return url, err</span>
+        <span class="cov7" title="3">return url, err</span>
 }
 
 var (

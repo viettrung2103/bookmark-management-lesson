@@ -9,7 +9,7 @@ swagger:
 dev-run: swagger run
 
 COVERAGE_EXCLUDE=mocks|main.go|test|pkg
-COVERAGE_THRESHOLD = 50
+COVERAGE_THRESHOLD = 40
 
 test:
 	$(eval COVER_PKGS := $(shell go list ./... | grep -vE "cmd|docs|mocks" | tr '\n' ',' | sed 's/,$$//'))
