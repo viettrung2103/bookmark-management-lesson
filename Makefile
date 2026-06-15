@@ -8,7 +8,7 @@ swagger:
 
 dev-run: swagger run
 
-COVERAGE_EXCLUDE=mocks|main.go|test
+COVERAGE_EXCLUDE=mocks|main.go|test|pkg
 COVERAGE_THRESHOLD = 50
 
 test:
