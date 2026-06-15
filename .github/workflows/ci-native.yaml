@@ -35,8 +35,8 @@ jobs:
         with:
           images: ${{ secrets.DOCKER_USERNAME }}/test1234
           tags: |
-            type=ref, event=tag
-            type=raw, value=dev, enable = ${{ github.ref_name == 'main' }}
+            type=ref,event=tag
+            type=raw,value=dev, enable = ${{ github.ref_name == 'main' }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
