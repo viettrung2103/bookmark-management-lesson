@@ -15,7 +15,7 @@ info:
   contact: {}
   description: API for bookmark management
   title: Bookmark API
-  version: "1.0"
+  version: "2.0"
 paths:
   /genpass:
     get:
