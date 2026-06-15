@@ -8,6 +8,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/viettrung2103/bookmark-management-lesson/docs"
 	"github.com/viettrung2103/bookmark-management-lesson/internal/repository"
 	"github.com/viettrung2103/bookmark-management-lesson/pkg/utils"
 
@@ -61,8 +62,18 @@ func (e *engine) initRoutes() {
 	shortenUrlSvc := service.NewShortenUrl(shortenUrlRepo, keyGen)
 	shortenUrlHandler := handler.NewShortenUrlHandler(shortenUrlSvc)
 
+	healthCheckRepo := repository.NewHealthCheck(e.redis)
+	healthCheckSvc := service.NewHealthCheck(healthCheckRepo)
+
+	healthCheckHandler := handler.NewHealthCheck(healthCheckSvc)
+
 	e.app.GET("/genpass", genPassHandler.GeneratePassword)
+	e.app.GET("/health-check", healthCheckHandler.CheckHealth)
+
+	//int swagger routes
+	docs.SwaggerInfo.Host = e.cfg.Hostname
 	e.app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	e.app.POST("/v1/links/shorten", shortenUrlHandler.ShortenUrl)
 	e.app.GET("/v1/links/shorten/:code", shortenUrlHandler.Redirect)
 }

@@ -57,13 +57,35 @@
 				
 				<option value="file0">github.com/viettrung2103/bookmark-management-lesson/docs/docs.go (100.0%)</option>
 				
-				<option value="file1">github.com/viettrung2103/bookmark-management-lesson/internal/api/api.go (88.9%)</option>
+				<option value="file1">github.com/viettrung2103/bookmark-management-lesson/internal/api/api.go (95.0%)</option>
 				
 				<option value="file2">github.com/viettrung2103/bookmark-management-lesson/internal/api/config.go (0.0%)</option>
 				
 				<option value="file3">github.com/viettrung2103/bookmark-management-lesson/internal/handler/genpass.go (100.0%)</option>
 				
-				<option value="file4">github.com/viettrung2103/bookmark-management-lesson/internal/service/genpass.go (87.5%)</option>
+				<option value="file4">github.com/viettrung2103/bookmark-management-lesson/internal/handler/healthcheck.go (14.3%)</option>
+				
+				<option value="file5">github.com/viettrung2103/bookmark-management-lesson/internal/handler/shortenurl.go (27.3%)</option>
+				
+				<option value="file6">github.com/viettrung2103/bookmark-management-lesson/internal/repository/healthcheck_repo.go (50.0%)</option>
+				
+				<option value="file7">github.com/viettrung2103/bookmark-management-lesson/internal/repository/urlstorage.go (66.7%)</option>
+				
+				<option value="file8">github.com/viettrung2103/bookmark-management-lesson/internal/service/healthcheck_service.go (50.0%)</option>
+				
+				<option value="file9">github.com/viettrung2103/bookmark-management-lesson/internal/service/pass_service.go (100.0%)</option>
+				
+				<option value="file10">github.com/viettrung2103/bookmark-management-lesson/internal/service/urlStorage_service.go (60.0%)</option>
+				
+				<option value="file11">github.com/viettrung2103/bookmark-management-lesson/pkg/logger/level.go (0.0%)</option>
+				
+				<option value="file12">github.com/viettrung2103/bookmark-management-lesson/pkg/redis/client.go (0.0%)</option>
+				
+				<option value="file13">github.com/viettrung2103/bookmark-management-lesson/pkg/redis/config.go (0.0%)</option>
+				
+				<option value="file14">github.com/viettrung2103/bookmark-management-lesson/pkg/redis/mock.go (100.0%)</option>
+				
+				<option value="file15">github.com/viettrung2103/bookmark-management-lesson/pkg/utils/code.go (87.5%)</option>
 				
 				</select>
 			</div>
@@ -119,6 +141,101 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/health-check": {
+            "get": {
+                "description": "ping and pong with redis server",
+                "tags": [
+                    "health-check"
+                ],
+                "summary": "check redis health",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/links/shorten": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "link"
+                ],
+                "summary": "receive the url, return the code",
+                "parameters": [
+                    {
+                        "description": "Shorten URL Input payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.shortenUrlRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/links/shorten/{code}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "link"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "code",
+                        "name": "code",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Found"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "handler.shortenUrlRequest": {
+            "type": "object",
+            "required": [
+                "exp",
+                "url"
+            ],
+            "properties": {
+                "exp": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
         }
     }
 }`
@@ -149,8 +266,12 @@ import (
         "net/http"
 
         "github.com/gin-gonic/gin"
+        "github.com/redis/go-redis/v9"
         swaggerFiles "github.com/swaggo/files"
         ginSwagger "github.com/swaggo/gin-swagger"
+        "github.com/viettrung2103/bookmark-management-lesson/docs"
+        "github.com/viettrung2103/bookmark-management-lesson/internal/repository"
+        "github.com/viettrung2103/bookmark-management-lesson/pkg/utils"
 
         _ "github.com/viettrung2103/bookmark-management-lesson/docs"
         "github.com/viettrung2103/bookmark-management-lesson/internal/handler"
@@ -164,15 +285,17 @@ type Engine interface {
 }
 
 type engine struct {
-        app *gin.Engine
-        cfg *Config
+        app   *gin.Engine
+        cfg   *Config
+        redis *redis.Client
 }
 
 // NewEngine creates a new engine
-func NewEngine(cfg *Config) Engine <span class="cov10" title="2">{
+func NewEngine(cfg *Config, redis *redis.Client) Engine <span class="cov10" title="2">{
         app := &amp;engine{
-                app: gin.Default(),
-                cfg: cfg,
+                app:   gin.Default(),
+                cfg:   cfg,
+                redis: redis,
         }
         app.initRoutes()
 
@@ -195,8 +318,25 @@ func (e *engine) initRoutes() <span class="cov10" title="2">{
         genPassSvc := service.NewGenPass()
         genPassHandler := handler.NewGenPass(genPassSvc)
 
+        keyGen := utils.NewKeyGenerator()
+        shortenUrlRepo := repository.NewUrlStorage(e.redis)
+        shortenUrlSvc := service.NewShortenUrl(shortenUrlRepo, keyGen)
+        shortenUrlHandler := handler.NewShortenUrlHandler(shortenUrlSvc)
+
+        healthCheckRepo := repository.NewHealthCheck(e.redis)
+        healthCheckSvc := service.NewHealthCheck(healthCheckRepo)
+
+        healthCheckHandler := handler.NewHealthCheck(healthCheckSvc)
+
         e.app.GET("/genpass", genPassHandler.GeneratePassword)
+        e.app.GET("/health-check", healthCheckHandler.CheckHealth)
+
+        //int swagger routes
+        docs.SwaggerInfo.Host = e.cfg.Hostname
         e.app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+        e.app.POST("/v1/links/shorten", shortenUrlHandler.ShortenUrl)
+        e.app.GET("/v1/links/shorten/:code", shortenUrlHandler.Redirect)
 }</span>
 </pre>
 		
@@ -205,7 +345,10 @@ func (e *engine) initRoutes() <span class="cov10" title="2">{
 import "github.com/kelseyhightower/envconfig"
 
 type Config struct {
-        AppPort string `default:"8080" envconfig:"APP_PORT"`
+        AppPort     string `default:"8080" envconfig:"APP_PORT"`
+        ServiceName string `default:"bookmark_service" envconfig:"SERVICE_NAME"`
+        InstanceId  string `default:"" envconfig:"INSTANCE_ID"`
+        Hostname    string `default:"localhost:8080" envconfig:"APP_HOSTNAME"`
 }
 
 func NewConfig() (*Config, error) <span class="cov0" title="0">{
@@ -238,7 +381,7 @@ type genPassHandler struct {
 }
 
 // NewGenPass creates a new genpass handler
-func NewGenPass(genPassSvc service.GenPass) GenPass <span class="cov10" title="4">{
+func NewGenPass(genPassSvc service.GenPass) GenPass <span class="cov10" title="3">{
         return &amp;genPassHandler{
                 genPassService: genPassSvc,
         }
@@ -250,53 +393,513 @@ func NewGenPass(genPassSvc service.GenPass) GenPass <span class="cov10" title="4
 // @Tags password
 // @Success 200 {object} string "12345678"
 // @Router /genpass [get]
-func (s *genPassHandler) GeneratePassword(c *gin.Context) <span class="cov8" title="3">{
-        pass, err := s.genPassService.GeneratePassword(passwordLength)
-        if err != nil </span><span class="cov1" title="1">{
-                c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Err"})
+func (s *genPassHandler) GeneratePassword(c *gin.Context) <span class="cov6" title="2">{
+        pass := s.genPassService.GeneratePassword()
+        
+        c.JSON(http.StatusOK, gin.H{"password": pass})
+}</span>
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package handler
+
+import (
+        "net/http"
+
+        "github.com/gin-gonic/gin"
+        "github.com/rs/zerolog/log"
+        "github.com/viettrung2103/bookmark-management-lesson/internal/service"
+)
+
+type HealthCheck interface {
+        CheckHealth(c *gin.Context)
+}
+type healthCheckHandler struct {
+        healthCheckSvc service.HealthCheck
+        //cfg                *config.Config
+}
+
+func NewHealthCheck(healthCheckSvc service.HealthCheck) HealthCheck <span class="cov10" title="2">{
+        return &amp;healthCheckHandler{
+                healthCheckSvc: healthCheckSvc,
+        }
+}</span>
+
+// CheckHealth checks the health of the service
+// @Summary check redis health
+// @Description ping and pong with redis server
+// @Tags health-check
+// @Success 200 {object} map[string]interface{}
+// @Router /health-check [get]
+func (h *healthCheckHandler) CheckHealth(c *gin.Context) <span class="cov0" title="0">{
+        err := h.healthCheckSvc.CheckHealth(c)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Error().Err(err).Str("from", "handler.healthCheckHandler.CheckHealth").Msg("redis server is down")
+
+                c.JSON(http.StatusServiceUnavailable, gin.H{
+                        "status": "DOWN",
+                        "redis":  "unreachable",
+                        "error":  "Service Unavailable",
+                })
                 return
         }</span>
-        <span class="cov5" title="2">c.JSON(http.StatusOK, gin.H{"password": pass})</span>
+        <span class="cov0" title="0">c.JSON(
+                http.StatusOK, gin.H{
+                        "status": "UP",
+                        "redis":  "reachable",
+                })</span>
 }
 </pre>
 		
-		<pre class="file" id="file4" style="display: none">package service
+		<pre class="file" id="file5" style="display: none">package handler
 
 import (
-        "crypto/rand"
-        "math/big"
+        "errors"
+        "net/http"
+
+        "github.com/gin-gonic/gin"
+        "github.com/rs/zerolog/log"
+        "github.com/viettrung2103/bookmark-management-lesson/internal/service"
+)
+
+type ShortenUrlHandler interface {
+        ShortenUrl(c *gin.Context)
+        Redirect(c *gin.Context)
+}
+
+type shortenUrlHandler struct {
+        shortenUrlService service.ShortenUrl
+}
+
+func NewShortenUrlHandler(shortenUrlSvc service.ShortenUrl) ShortenUrlHandler <span class="cov10" title="4">{
+        return &amp;shortenUrlHandler{
+                shortenUrlService: shortenUrlSvc,
+        }
+}</span>
+
+type shortenUrlRequest struct {
+        URL    string `json:"url" binding:"required,url"`
+        Expiry int64  `json:"exp" binding:"required"`
+}
+
+type shortenUrlResponse struct {
+        Code string `json:"code"`
+}
+
+// ShortenUrl shorten the url to code
+// @Summary receive the url, return the code
+// @Tags link
+// @Accept application/json
+// @Produce application/json
+// @Param request body shortenUrlRequest true "Shorten URL Input payload"
+// @Success 200 {object} string
+// @Router /v1/links/shorten [post]
+func (h *shortenUrlHandler) ShortenUrl(c *gin.Context) <span class="cov0" title="0">{
+        request := &amp;shortenUrlRequest{}
+        if err := c.ShouldBindJSON(request); err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": "input error"})
+                return
+        }</span>
+
+        <span class="cov0" title="0">key, err := h.shortenUrlService.ShortenUrl(c, request.URL, request.Expiry)
+        if err != nil </span><span class="cov0" title="0">{
+                c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+                return
+        }</span>
+        <span class="cov0" title="0">c.JSON(http.StatusOK, gin.H{"code": key, "exp": request.Expiry})</span>
+}
+
+// Redirect Forward the request to the original url
+// @Tags link
+// @Accept application/json
+// @Produce application/json
+// @Param code path string true "code"
+// @Success        302
+// @Router /v1/links/shorten/{code} [get]
+func (h *shortenUrlHandler) Redirect(c *gin.Context) <span class="cov5" title="2">{
+        code := c.Param("code")
+        if code == "" </span><span class="cov0" title="0">{
+                c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "code is required"})
+        }</span>
+
+        // call service to get url from code
+        <span class="cov5" title="2">url, err := h.shortenUrlService.GetURL(c, code)
+        if err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, service.UrlNotFound) </span><span class="cov0" title="0">{
+                        c.JSON(http.StatusBadRequest, gin.H{"error": "url not found"})
+                        return
+                }</span>
+                <span class="cov0" title="0">log.Error().Err(err).Str("from", "handler.shortenurl.Redirect").Msg("failed to get url from code")
+                c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+                return</span>
+        }
+
+        // redirect to url
+        <span class="cov5" title="2">c.Redirect(http.StatusFound, url)</span>
+
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package repository
+
+import (
+        "context"
+
+        "github.com/redis/go-redis/v9"
+)
+
+// HealthCheck is the interface for health check
+//go:generate mockery --name=HealthCheck --filename=healthcheck.go
+
+type HealthCheck interface {
+        CheckHealth(ctx context.Context) error
+}
+type healthCheckRepo struct {
+        c *redis.Client
+}
+
+// NewHealthCheck creates a new HealthCheck
+func NewHealthCheck(c *redis.Client) HealthCheck <span class="cov10" title="2">{
+        return &amp;healthCheckRepo{
+                c: c,
+        }
+}</span>
+
+// CheckHealth check health of redis server
+func (s *healthCheckRepo) CheckHealth(ctx context.Context) error <span class="cov0" title="0">{
+
+        return s.c.Ping(ctx).Err()
+}</span>
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package repository
+
+import (
+        "context"
+        "time"
+
+        "github.com/redis/go-redis/v9"
+)
+
+const (
+        urlExpTime = 24 * time.Hour
+)
+
+//go:generate mockery --name=UrlStorage --filename=urlstorage.go
+
+// UrlStorage is the interface for URL storage
+type UrlStorage interface {
+        StoreURL(ctx context.Context, code, url string, exp time.Duration) error
+        GetURL(ctx context.Context, code string) (string, error)
+}
+
+type urlStorage struct {
+        c *redis.Client
+}
+
+// NewUrlStorage creates a new UrlStorage
+func NewUrlStorage(c *redis.Client) UrlStorage <span class="cov10" title="3">{
+        return &amp;urlStorage{c: c}
+}</span>
+
+// StoreURL stores a URL in the cache
+func (s *urlStorage) StoreURL(ctx context.Context, code, url string, exp time.Duration) error <span class="cov1" title="1">{
+        err := s.c.Set(ctx, code, url, exp).Err()
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov1" title="1">return nil</span>
+}
+
+// GetURL retrieves a URL from the cache
+func (s *urlStorage) GetURL(ctx context.Context, code string) (string, error) <span class="cov0" title="0">{
+        //res, err := s.c.Get(ctx, code).Result()
+        //if err != nil {
+        //        return "", err
+        //}
+        //return res, nil
+        return s.c.Get(ctx, code).Result()
+}</span>
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package service
+
+import (
+        "context"
+
+        "github.com/viettrung2103/bookmark-management-lesson/internal/repository"
+)
+
+// HealthCheck represents the health check service
+//
+//go:generate mockery --name=HealthCheck --filename=healthcheck.go
+type HealthCheck interface {
+        CheckHealth(ctx context.Context) error
+}
+
+type healthCheckService struct {
+        repo repository.HealthCheck
+}
+
+// NewHealthCheckS creates a new HealthCheck
+func NewHealthCheck(repo repository.HealthCheck) HealthCheck <span class="cov10" title="2">{
+        return &amp;healthCheckService{repo: repo}
+}</span>
+
+// CheckHealth checks the health of the service
+func (s *healthCheckService) CheckHealth(ctx context.Context) error <span class="cov0" title="0">{
+        return s.repo.CheckHealth(ctx)
+}</span>
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package service
+
+import (
+        "github.com/viettrung2103/bookmark-management-lesson/pkg/utils"
+)
+
+const (
+        charset    = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        passLength = 10
+)
+
+type genPassService struct {
+        keygen utils.KeyGenerator
+}
+
+// GenPass represents the genpass service
+//
+//go:generate mockery --name=GenPass --filename=genpass.go
+type GenPass interface {
+        GeneratePassword() string
+}
+
+// NewGenPass return a GenPassService
+func NewGenPass() GenPass <span class="cov10" title="3">{
+        return &amp;genPassService{}
+}</span>
+
+// GeneratePassword generates a random password
+func (s *genPassService) GeneratePassword() string <span class="cov6" title="2">{
+
+        return utils.GenerateRandomString(passLength)
+
+}</span>
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package service
+
+import (
+        "context"
+        "errors"
+        "time"
+
+        "github.com/redis/go-redis/v9"
+        "github.com/viettrung2103/bookmark-management-lesson/internal/repository"
+        "github.com/viettrung2103/bookmark-management-lesson/pkg/utils"
+)
+
+//go:generate mockery --name=ShortenUrl --filename=shortenurl.go
+
+// ShortenUrl represents the shorten url service
+type ShortenUrl interface {
+        ShortenUrl(ctx context.Context, url string, exp int64) (string, error)
+        GetLinkFromCode(ctx context.Context, urlCode string) (string, error)
+        GetURL(ctx context.Context, urlCode string) (string, error)
+}
+
+type shortenUrlService struct {
+        repo   repository.UrlStorage
+        keygen utils.KeyGenerator
+}
+
+// NewShortenUrl returns a new ShortenUrl
+func NewShortenUrl(repo repository.UrlStorage, keygen utils.KeyGenerator) ShortenUrl <span class="cov10" title="7">{
+        return &amp;shortenUrlService{
+                repo:   repo,
+                keygen: keygen,
+        }
+}</span>
+
+const (
+        urlCodeLength = 7
+)
+
+// ShortenUrl shortens a url
+func (s *shortenUrlService) ShortenUrl(ctx context.Context, url string, exp int64) (string, error) <span class="cov6" title="3">{
+        // tao key
+        key := s.keygen.GenerateKey(urlCodeLength)
+
+        res, err := s.repo.GetURL(ctx, key)
+
+        if err != nil &amp;&amp; !errors.Is(err, redis.Nil) </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+
+        <span class="cov6" title="3">if res != "" </span><span class="cov1" title="1">{
+                return s.ShortenUrl(ctx, url, exp)
+        }</span>
+
+        // put key into redis
+        <span class="cov4" title="2">err = s.repo.StoreURL(ctx, key, url, time.Duration(exp)*time.Second)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+        <span class="cov4" title="2">return key, nil</span>
+}
+
+var ErrCodeDoesNotExist = errors.New("code does not exist")
+
+func (s *shortenUrlService) GetLinkFromCode(ctx context.Context, urlCode string) (string, error) <span class="cov6" title="3">{
+        url, err := s.repo.GetURL(ctx, urlCode)
+        if errors.Is(err, redis.Nil) </span><span class="cov0" title="0">{
+                return "", ErrCodeDoesNotExist
+        }</span>
+
+        <span class="cov6" title="3">return url, err</span>
+}
+
+var (
+        UrlNotFound = errors.New("url not found")
+)
+
+func (s *shortenUrlService) GetURL(ctx context.Context, urlCode string) (string, error) <span class="cov0" title="0">{
+        // call repo to get url
+        url, err := s.repo.GetURL(ctx, urlCode)
+        if err == nil </span><span class="cov0" title="0">{
+                if errors.Is(err, redis.Nil) </span><span class="cov0" title="0">{
+                        return "", UrlNotFound
+                }</span>
+        }
+
+        <span class="cov0" title="0">return url, err</span>
+
+}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package logger
+
+import (
+        "os"
+
+        "github.com/rs/zerolog"
+)
+
+func SetLogLevel() <span class="cov0" title="0">{
+        level, err := zerolog.ParseLevel(os.Getenv("LOG_LEVEL"))
+        if err != nil || level == zerolog.NoLevel </span><span class="cov0" title="0">{
+                level = zerolog.InfoLevel
+        }</span>
+        <span class="cov0" title="0">zerolog.SetGlobalLevel(level)</span>
+}
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">package redis
+
+import "github.com/redis/go-redis/v9"
+
+func NewClient(envPrefix string) (*redis.Client, error) <span class="cov0" title="0">{
+        cfg, err := newConfig(envPrefix)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">redisClient := redis.NewClient(&amp;redis.Options{
+                Addr:     cfg.Address,
+                Password: cfg.Password,
+                DB:       cfg.DB,
+        })
+
+        return redisClient, nil</span>
+
+}
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package redis
+
+import "github.com/kelseyhightower/envconfig"
+
+type config struct {
+        Address  string `default:"localhost:6379" envconfig:"REDIS_ADDR"`
+        Password string `default:"" envconfig:"REDIS_PASSWORD"`
+        DB       int    `default:"0" envconfig:"REDIS_DB"`
+}
+
+func newConfig(envPrefix string) (*config, error) <span class="cov0" title="0">{
+        cfg := &amp;config{}
+        err := envconfig.Process(envPrefix, cfg)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">return cfg, err</span>
+}
+</pre>
+		
+		<pre class="file" id="file14" style="display: none">package redis
+
+import (
+        "testing"
+
+        "github.com/alicebob/miniredis/v2"
+        "github.com/redis/go-redis/v9"
+)
+
+// InitMockRedis returns a mock redis client for testing
+func InitMockRedis(t *testing.T) *redis.Client <span class="cov10" title="3">{
+        mock := miniredis.RunT(t)
+        return redis.NewClient(&amp;redis.Options{
+                Addr: mock.Addr(),
+        })
+}</span>
+</pre>
+		
+		<pre class="file" id="file15" style="display: none">package utils
+
+import (
+        "bytes"
+        "math/rand"
+        "time"
 )
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
-// GenPass represents the genpass service
-//go:generate mockery --name=GenPass --filename=genpass.go
-type GenPass interface {
-        GeneratePassword(length int) (string, error)
-}
-type GenPassService struct {
+// KeyGenerator is the interface for key generator
+//
+//go:generate mockery --name=KeyGenerator --filename=keygenerator.go
+type KeyGenerator interface {
+        GenerateKey(length int) string
 }
 
-// NewGenPass return a GenPassService
-func NewGenPass() GenPass <span class="cov2" title="5">{
-        return &amp;GenPassService{}
+type randomStringGenerator struct {
+        rng *rand.Rand
+}
+
+func NewKeyGenerator() KeyGenerator <span class="cov3" title="2">{
+        return &amp;randomStringGenerator{
+                rng: rand.New(rand.NewSource(time.Now().UnixNano())),
+        }
 }</span>
 
-// GeneratePassword generates a random password
-func (s *GenPassService) GeneratePassword(length int) (string, error) <span class="cov2" title="4">{
+func (r *randomStringGenerator) GenerateKey(length int) string <span class="cov0" title="0">{
 
-        password := make([]byte, length)
+        return randomString(r.rng, length)
+}</span>
 
-        for i := 0; i &lt; length; i++ </span><span class="cov10" title="10025">{
-                n, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
-                if err != nil </span><span class="cov0" title="0">{
-                        return "", err
-                }</span>
-                <span class="cov10" title="10025">password[i] = charset[n.Int64()]</span>
-        }
+func GenerateRandomString(length int) string <span class="cov3" title="2">{
 
-        <span class="cov2" title="4">return string(password), nil</span>
+        rng := rand.New(rand.NewSource(time.Now().UnixNano()))
+        return randomString(rng, length)
 
+}</span>
+
+func randomString(rng *rand.Rand, length int) string <span class="cov3" title="2">{
+        var strBuilder bytes.Buffer
+
+        for i := 0; i &lt; length; i++ </span><span class="cov10" title="20">{
+
+                strBuilder.WriteByte(charset[rng.Intn(len(charset))])
+        }</span>
+
+        <span class="cov3" title="2">return strBuilder.String()</span>
 }
 </pre>
 		

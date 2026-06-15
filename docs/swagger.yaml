@@ -28,6 +28,18 @@ paths:
       summary: Generate a new password
       tags:
       - password
+  /health-check:
+    get:
+      description: ping and pong with redis server
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: check redis health
+      tags:
+      - health-check
   /v1/links/shorten:
     post:
       consumes:

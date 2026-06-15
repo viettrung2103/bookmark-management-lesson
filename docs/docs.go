@@ -32,6 +32,24 @@ const docTemplate = `{
                 }
             }
         },
+        "/health-check": {
+            "get": {
+                "description": "ping and pong with redis server",
+                "tags": [
+                    "health-check"
+                ],
+                "summary": "check redis health",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/v1/links/shorten": {
             "post": {
                 "consumes": [

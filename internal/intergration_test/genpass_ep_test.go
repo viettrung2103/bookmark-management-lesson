@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/viettrung2103/bookmark-management-lesson/internal/api"
+	"github.com/viettrung2103/bookmark-management-lesson/pkg/redis"
 )
 
 func TestGenPassEndpoint(t *testing.T) {
@@ -49,8 +50,9 @@ func TestGenPassEndpoint(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
+			mockRedis := redis.InitMockRedis(t)
 
-			testApi := api.NewEngine(&api.Config{})
+			testApi := api.NewEngine(&api.Config{}, mockRedis)
 			recorder := tc.setupTestHTTP(testApi)
 
 			assert.Equal(t, tc.expectedStatusCode, recorder.Code)
