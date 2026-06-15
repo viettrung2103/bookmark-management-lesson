@@ -25,17 +25,33 @@
 #	   echo "Coverage ($$total%) meets threshold ($(COVERAGE_THRESHOLD)%)"; \
 #	fi
 
-.PHONY: run swagger dev-run test
+#.PHONY: run swagger dev-run test
+IMG_NAME=viettrung21/bookmark-service-lesson
+GIT_TAG := $(shell git describe --tags --exact-match 2>/dev/null)
+BRANCH 	:= $(shell git rev-parse --abbrev-ref HEAD)
 
+IMG_TAG := dev
+
+ifeq ($(BRANCH),main)
+	IMG_TAG := dev
+endif
+
+ifneq ($(GIT_TAG),)
+	IMG_TAG := $(GIT_TAG)
+endif
+
+export IMG_TAG
+
+.PHONY: run swagger dev-run test docker-test docker-build docker-release docker-login
 run:
 	go run cmd/api/main.go
 
 swagger:
-	swag init -g cmd/api/main.go
+	swag init -g cmd/api/main.go output docs
 
 dev-run: swagger run
 
-COVERAGE_EXCLUDE=mocks|main.go|test
+COVERAGE_EXCLUDE=mocks|main.go|test|docs|test|config.go
 COVERAGE_THRESHOLD = 50
 
 test:
@@ -49,3 +65,28 @@ test:
 	else \
 		echo "Coverage ($$total%) meets threshold ($(COVERAGE_THRESHOLD)%)"; \
 	fi
+
+COVERAGE_FOLDER =./coverage
+
+docker-test:
+	mkdir -p ${COVERAGE_FOLDER}
+	docker buildx build --build-arg COVERAGE_EXCLUDE="$(COVERAGE_EXCLUDE)" --target test -t bookmark-service-test:dev --output $(COVERAGE_FOLDER) .
+	@total=$$(go tool cover -func=$(COVERAGE_FOLDER)/coverage.out | grep total: | awk '{print $$3}' | sed 's/%//'); \
+	if [ $$(echo "$$total < $(COVERAGE_THRESHOLD)" | bc -l) -eq 1 ]; then \
+		echo "X Coverage ($$total%) is below threshold ($(COVERAGE_THRESHOLD)%)"; \
+		exit 1; \
+	else \
+		echo "checked Coverage($$total%) meets threshold ($(COVERAGE_THRESHOLD)%)"; \
+	fi
+
+docker-build:
+	docker build -t $(IMG_NAME):$(IMG_TAG) .
+
+docker-release:
+	docker push $(IMG_NAME):$(IMG_TAG)
+
+DOCKER_USERNAME ?=
+DOCKER_PASSWORD ?=
+
+docker-login:
+	echo "$(DOCKER_PASSWORD)" | docker login -u "$(DOCKER_USERNAME)" --password-stdin
