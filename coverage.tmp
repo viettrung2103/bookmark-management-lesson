@@ -23,7 +23,7 @@ github.com/viettrung2103/bookmark-management-lesson/cmd/test_sql/main.go:19.2,19
 github.com/viettrung2103/bookmark-management-lesson/cmd/test_sql/main.go:22.13,25.16 2 0
 github.com/viettrung2103/bookmark-management-lesson/cmd/test_sql/main.go:25.16,26.13 1 0
 github.com/viettrung2103/bookmark-management-lesson/cmd/test_sql/main.go:29.2,36.23 3 0
-github.com/viettrung2103/bookmark-management-lesson/docs/docs.go:232.13,234.2 1 0
+github.com/viettrung2103/bookmark-management-lesson/docs/docs.go:215.13,217.2 1 0
 github.com/viettrung2103/bookmark-management-lesson/internal/api/api.go:39.87,50.2 3 0
 github.com/viettrung2103/bookmark-management-lesson/internal/api/api.go:53.32,55.2 1 0
 github.com/viettrung2103/bookmark-management-lesson/internal/api/api.go:58.70,60.2 1 0
