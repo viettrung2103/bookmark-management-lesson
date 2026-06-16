@@ -111,6 +111,7 @@ func (e *engine) initRoutes() {
 
 	//health-check
 	e.app.GET("/health-check", allHandlers.healthCheckHandler.CheckHealth)
+	//e.app.GET("/genpass", allHandlers.genPassHandler.GeneratePassword)
 
 	//Init swagger routes
 	docs.SwaggerInfo.Host = e.cfg.Hostname
