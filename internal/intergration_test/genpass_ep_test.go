@@ -5,9 +5,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/viettrung2103/bookmark-management-lesson/internal/api"
 	"github.com/viettrung2103/bookmark-management-lesson/pkg/redis"
+	"github.com/viettrung2103/bookmark-management-lesson/pkg/sqldb"
 )
 
 func TestGenPassEndpoint(t *testing.T) {
@@ -51,8 +53,10 @@ func TestGenPassEndpoint(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			mockRedis := redis.InitMockRedis(t)
+			mockDB := sqldb.CreateTestDb(t)
+			mockEngine := gin.Default()
 
-			testApi := api.NewEngine(&api.Config{}, mockRedis)
+			testApi := api.NewEngine(mockEngine, &api.Config{}, mockRedis, mockDB)
 			recorder := tc.setupTestHTTP(testApi)
 
 			assert.Equal(t, tc.expectedStatusCode, recorder.Code)
