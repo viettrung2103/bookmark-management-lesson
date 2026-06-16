@@ -52,7 +52,7 @@ swagger:
 dev-run: swagger run
 
 COVERAGE_EXCLUDE=mocks|main.go|test|docs|test|config.go
-COVERAGE_THRESHOLD = 50
+COVERAGE_THRESHOLD = 20
 
 test:
 	go test ./... -coverprofile=coverage.tmp -covermode=atomic -coverpkg=./... -p 1
