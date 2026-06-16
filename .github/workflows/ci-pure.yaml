@@ -1,4 +1,4 @@
-name: ci-pure-pipeline
+name: ci-pipeline
 
 on:
   pull_request:

@@ -8,7 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
-	"github.com/viettrung2103/bookmark-management-lesson/internal/service/mocks"
+	"github.com/viettrung2103/bookmark-management-lesson/internal/app/service/mocks"
 )
 
 func TestShortenUrlHandler_Redirect(t *testing.T) {

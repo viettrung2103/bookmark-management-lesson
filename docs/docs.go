@@ -15,23 +15,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/genpass": {
-            "get": {
-                "description": "Generate a new password",
-                "tags": [
-                    "password"
-                ],
-                "summary": "Generate a new password",
-                "responses": {
-                    "200": {
-                        "description": "12345678",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/health-check": {
             "get": {
                 "description": "ping and pong with redis server",
@@ -50,7 +33,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/links/shorten": {
+        "/links/shorten": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -83,7 +66,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/links/shorten/{code}": {
+        "/links/shorten/{code}": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -109,6 +92,48 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/v1/users/register": {
+            "post": {
+                "description": "Create a new user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Create a new user",
+                "parameters": [
+                    {
+                        "description": "User registration input",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.registerInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "$ref": "#/definitions/model.User"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -123,6 +148,49 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.User": {
+            "type": "object",
+            "properties": {
+                "_": {
+                    "type": "string"
+                },
+                "display_name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.registerInput": {
+            "type": "object",
+            "required": [
+                "display_name",
+                "email",
+                "password",
+                "username"
+            ],
+            "properties": {
+                "display_name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
                     "type": "string"
                 }
             }

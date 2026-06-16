@@ -6,10 +6,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
-	"github.com/viettrung2103/bookmark-management-lesson/internal/service"
+	"github.com/viettrung2103/bookmark-management-lesson/internal/app/service"
 )
 
-type ShortenUrlHandler interface {
+type ShortenUrl interface {
 	ShortenUrl(c *gin.Context)
 	Redirect(c *gin.Context)
 }
@@ -18,7 +18,7 @@ type shortenUrlHandler struct {
 	shortenUrlService service.ShortenUrl
 }
 
-func NewShortenUrlHandler(shortenUrlSvc service.ShortenUrl) ShortenUrlHandler {
+func NewShortenUrlHandler(shortenUrlSvc service.ShortenUrl) ShortenUrl {
 	return &shortenUrlHandler{
 		shortenUrlService: shortenUrlSvc,
 	}
@@ -40,7 +40,7 @@ type shortenUrlResponse struct {
 // @Produce application/json
 // @Param request body shortenUrlRequest true "Shorten URL Input payload"
 // @Success 200 {object} string
-// @Router /v1/links/shorten [post]
+// @Router /links/shorten [post]
 func (h *shortenUrlHandler) ShortenUrl(c *gin.Context) {
 	request := &shortenUrlRequest{}
 	if err := c.ShouldBindJSON(request); err != nil {
@@ -62,7 +62,7 @@ func (h *shortenUrlHandler) ShortenUrl(c *gin.Context) {
 // @Produce application/json
 // @Param code path string true "code"
 // @Success	302
-// @Router /v1/links/shorten/{code} [get]
+// @Router /links/shorten/{code} [get]
 func (h *shortenUrlHandler) Redirect(c *gin.Context) {
 	code := c.Param("code")
 	if code == "" {

@@ -10,6 +10,35 @@ definitions:
     - exp
     - url
     type: object
+  model.User:
+    properties:
+      _:
+        type: string
+      display_name:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      username:
+        type: string
+    type: object
+  user.registerInput:
+    properties:
+      display_name:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - display_name
+    - email
+    - password
+    - username
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -17,17 +46,6 @@ info:
   title: Bookmark API
   version: "1.0"
 paths:
-  /genpass:
-    get:
-      description: Generate a new password
-      responses:
-        "200":
-          description: "12345678"
-          schema:
-            type: string
-      summary: Generate a new password
-      tags:
-      - password
   /health-check:
     get:
       description: ping and pong with redis server
@@ -40,7 +58,7 @@ paths:
       summary: check redis health
       tags:
       - health-check
-  /v1/links/shorten:
+  /links/shorten:
     post:
       consumes:
       - application/json
@@ -61,7 +79,7 @@ paths:
       summary: receive the url, return the code
       tags:
       - link
-  /v1/links/shorten/{code}:
+  /links/shorten/{code}:
     get:
       consumes:
       - application/json
@@ -78,4 +96,31 @@ paths:
           description: Found
       tags:
       - link
+  /v1/users/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user
+      parameters:
+      - description: User registration input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/user.registerInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/model.User'
+              message:
+                type: string
+            type: object
+      summary: Create a new user
+      tags:
+      - user
 swagger: "2.0"
