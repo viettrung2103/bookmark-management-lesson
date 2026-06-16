@@ -46,17 +46,6 @@ info:
   title: Bookmark API
   version: "1.0"
 paths:
-  /genpass:
-    get:
-      description: Generate a new password
-      responses:
-        "200":
-          description: "12345678"
-          schema:
-            type: string
-      summary: Generate a new password
-      tags:
-      - password
   /health-check:
     get:
       description: ping and pong with redis server
@@ -69,7 +58,7 @@ paths:
       summary: check redis health
       tags:
       - health-check
-  /v1/links/shorten:
+  /links/shorten:
     post:
       consumes:
       - application/json
@@ -90,7 +79,7 @@ paths:
       summary: receive the url, return the code
       tags:
       - link
-  /v1/links/shorten/{code}:
+  /links/shorten/{code}:
     get:
       consumes:
       - application/json
@@ -107,7 +96,7 @@ paths:
           description: Found
       tags:
       - link
-  /v1/user/register:
+  /v1/users/register:
     post:
       consumes:
       - application/json

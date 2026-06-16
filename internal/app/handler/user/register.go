@@ -7,10 +7,10 @@ import (
 )
 
 type registerInput struct {
-	DisplayName string `json:"display_name" binding:"required, gt=0"`
-	Username    string `json:"username" binding:"required, gt=0"`
-	Password    string `json:"password" binding:"required, gt=8"`
-	Email       string `json:"email" binding:"required, email"`
+	DisplayName string `json:"display_name" binding:"required,gt=0"`
+	Username    string `json:"username" binding:"required,gt=0"`
+	Password    string `json:"password" binding:"required,gt=8"`
+	Email       string `json:"email" binding:"required,email"`
 }
 
 // Register handles user registration
@@ -21,7 +21,7 @@ type registerInput struct {
 // @Produce application/json
 // @Param input body registerInput true "User registration input"
 // @Success 200 {object} object{data=model.User,message=string} "Success"
-// @Router /v1/user/register [post]
+// @Router /v1/users/register [post]
 func (h *userHandler) Register(c *gin.Context) {
 	input := &registerInput{}
 	if err := c.ShouldBindJSON(input); err != nil {
