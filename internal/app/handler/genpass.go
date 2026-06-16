@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/viettrung2103/bookmark-management-lesson/internal/service"
+	"github.com/viettrung2103/bookmark-management-lesson/internal/app/service"
 )
 
 const passwordLength = 12
@@ -32,6 +32,6 @@ func NewGenPass(genPassSvc service.GenPass) GenPass {
 // @Router /genpass [get]
 func (s *genPassHandler) GeneratePassword(c *gin.Context) {
 	pass := s.genPassService.GeneratePassword()
-	
+
 	c.JSON(http.StatusOK, gin.H{"password": pass})
 }

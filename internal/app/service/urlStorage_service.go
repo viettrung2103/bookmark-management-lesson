@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/viettrung2103/bookmark-management-lesson/internal/repository"
+	"github.com/viettrung2103/bookmark-management-lesson/internal/app/repository"
 	"github.com/viettrung2103/bookmark-management-lesson/pkg/utils"
 )
 

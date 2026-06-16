@@ -1,9 +1,23 @@
 package main
 
 import (
-	"github.com/rs/zerolog/log"
-	"github.com/viettrung2103/bookmark-management-lesson/pkg/logger"
+	"github.com/google/uuid"
+	"github.com/viettrung2103/bookmark-management-lesson/pkg/sqldb"
+	"gorm.io/gorm"
 )
+
+type User struct {
+	ID       string
+	Username string
+	Password string
+}
+
+func (u *User) BeforeCrete(tx *gorm.DB) (err error) {
+	if u.ID == "" {
+		u.ID = uuid.New().String()
+	}
+	return
+}
 
 func main() {
 
@@ -35,9 +49,23 @@ func main() {
 	//key, _ := urlService.ShortenUrl(ctx, "https://google.com")
 	//print(key)
 
-	logger.SetLogLevel()
+	//logger.SetLogLevel()
+	//
+	//log.Debug().Str("name", "debug").Int("run-time", 1000).Msg("log nay chi hien thi o debug level")
+	//log.Info().Str("name", "debug").Int("run-time", 1000).Msg("log nay chi hien thi o debug level")
 
-	log.Debug().Str("name", "debug").Int("run-time", 1000).Msg("log nay chi hien thi o debug level")
-	log.Info().Str("name", "debug").Int("run-time", 1000).Msg("log nay chi hien thi o debug level")
+	dbClient, err := sqldb.NewClient("")
+	if err != nil {
+		panic(err)
+	}
+
+	dbClient.AutoMigrate(&User{})
+
+	user := &User{
+		//ID:       "1",
+		Username: "test",
+		Password: "test",
+	}
+	dbClient.Create(user)
 
 }
