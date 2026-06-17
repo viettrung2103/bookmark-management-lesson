@@ -28,6 +28,27 @@ type Engine interface {
 	initHandlers() *handlers
 }
 
+// EngineOpts holds initialization dependencies for the engine
+type EngineOpts struct {
+	Engine *gin.Engine
+	Cfg    *Config
+	Redis  *redis.Client
+	SqlDB  *gorm.DB
+}
+
+// New creates a new engine using an options struct configuration pointer
+func New(opts *EngineOpts) Engine {
+	eng := &engine{
+		app:   opts.Engine,
+		cfg:   opts.Cfg,
+		redis: opts.Redis,
+		db:    opts.SqlDB,
+	}
+	eng.initRoutes()
+
+	return eng
+}
+
 type engine struct {
 	app   *gin.Engine
 	cfg   *Config
