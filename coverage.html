@@ -55,19 +55,19 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/viettrung2103/bookmark-management-lesson/internal/api/api.go (0.0%)</option>
+				<option value="file0">github.com/viettrung2103/bookmark-management-lesson/internal/api/api.go (84.6%)</option>
 				
-				<option value="file1">github.com/viettrung2103/bookmark-management-lesson/internal/app/handler/healthcheck.go (0.0%)</option>
+				<option value="file1">github.com/viettrung2103/bookmark-management-lesson/internal/app/handler/healthcheck.go (14.3%)</option>
 				
 				<option value="file2">github.com/viettrung2103/bookmark-management-lesson/internal/app/handler/shortenurl.go (27.3%)</option>
 				
-				<option value="file3">github.com/viettrung2103/bookmark-management-lesson/internal/app/handler/user/handler.go (0.0%)</option>
+				<option value="file3">github.com/viettrung2103/bookmark-management-lesson/internal/app/handler/user/handler.go (100.0%)</option>
 				
-				<option value="file4">github.com/viettrung2103/bookmark-management-lesson/internal/app/handler/user/register.go (0.0%)</option>
+				<option value="file4">github.com/viettrung2103/bookmark-management-lesson/internal/app/handler/user/register.go (60.0%)</option>
 				
-				<option value="file5">github.com/viettrung2103/bookmark-management-lesson/internal/app/model/user.go (66.7%)</option>
+				<option value="file5">github.com/viettrung2103/bookmark-management-lesson/internal/app/model/user.go (100.0%)</option>
 				
-				<option value="file6">github.com/viettrung2103/bookmark-management-lesson/internal/app/repository/healthcheck_repo.go (0.0%)</option>
+				<option value="file6">github.com/viettrung2103/bookmark-management-lesson/internal/app/repository/healthcheck_repo.go (50.0%)</option>
 				
 				<option value="file7">github.com/viettrung2103/bookmark-management-lesson/internal/app/repository/urlstorage.go (66.7%)</option>
 				
@@ -75,29 +75,35 @@
 				
 				<option value="file9">github.com/viettrung2103/bookmark-management-lesson/internal/app/repository/user/repo.go (100.0%)</option>
 				
-				<option value="file10">github.com/viettrung2103/bookmark-management-lesson/internal/app/service/healthcheck_service.go (0.0%)</option>
+				<option value="file10">github.com/viettrung2103/bookmark-management-lesson/internal/app/service/healthcheck_service.go (50.0%)</option>
 				
 				<option value="file11">github.com/viettrung2103/bookmark-management-lesson/internal/app/service/pass_service.go (100.0%)</option>
 				
 				<option value="file12">github.com/viettrung2103/bookmark-management-lesson/internal/app/service/urlStorage_service.go (60.0%)</option>
 				
-				<option value="file13">github.com/viettrung2103/bookmark-management-lesson/internal/app/service/user/create.go (0.0%)</option>
+				<option value="file13">github.com/viettrung2103/bookmark-management-lesson/internal/app/service/user/create.go (100.0%)</option>
 				
-				<option value="file14">github.com/viettrung2103/bookmark-management-lesson/internal/app/service/user/service.go (0.0%)</option>
+				<option value="file14">github.com/viettrung2103/bookmark-management-lesson/internal/app/service/user/service.go (100.0%)</option>
 				
-				<option value="file15">github.com/viettrung2103/bookmark-management-lesson/pkg/logger/level.go (0.0%)</option>
+				<option value="file15">github.com/viettrung2103/bookmark-management-lesson/pkg/common/error.go (0.0%)</option>
 				
-				<option value="file16">github.com/viettrung2103/bookmark-management-lesson/pkg/redis/client.go (0.0%)</option>
+				<option value="file16">github.com/viettrung2103/bookmark-management-lesson/pkg/jwtutils/generator.go (91.7%)</option>
 				
-				<option value="file17">github.com/viettrung2103/bookmark-management-lesson/pkg/redis/mock.go (100.0%)</option>
+				<option value="file17">github.com/viettrung2103/bookmark-management-lesson/pkg/jwtutils/validator.go (71.4%)</option>
 				
-				<option value="file18">github.com/viettrung2103/bookmark-management-lesson/pkg/sqldb/client.go (0.0%)</option>
+				<option value="file18">github.com/viettrung2103/bookmark-management-lesson/pkg/logger/level.go (0.0%)</option>
 				
-				<option value="file19">github.com/viettrung2103/bookmark-management-lesson/pkg/sqldb/mock.go (80.0%)</option>
+				<option value="file19">github.com/viettrung2103/bookmark-management-lesson/pkg/redis/client.go (0.0%)</option>
 				
-				<option value="file20">github.com/viettrung2103/bookmark-management-lesson/pkg/utils/code.go (75.0%)</option>
+				<option value="file20">github.com/viettrung2103/bookmark-management-lesson/pkg/redis/mock.go (100.0%)</option>
 				
-				<option value="file21">github.com/viettrung2103/bookmark-management-lesson/pkg/utils/hash.go (0.0%)</option>
+				<option value="file21">github.com/viettrung2103/bookmark-management-lesson/pkg/sqldb/client.go (0.0%)</option>
+				
+				<option value="file22">github.com/viettrung2103/bookmark-management-lesson/pkg/sqldb/mock.go (80.0%)</option>
+				
+				<option value="file23">github.com/viettrung2103/bookmark-management-lesson/pkg/utils/code.go (87.5%)</option>
+				
+				<option value="file24">github.com/viettrung2103/bookmark-management-lesson/pkg/utils/hash.go (50.0%)</option>
 				
 				</select>
 			</div>
@@ -150,6 +156,27 @@ type Engine interface {
         initHandlers() *handlers
 }
 
+// EngineOpts holds initialization dependencies for the engine
+type EngineOpts struct {
+        Engine *gin.Engine
+        Cfg    *Config
+        Redis  *redis.Client
+        SqlDB  *gorm.DB
+}
+
+// New creates a new engine using an options struct configuration pointer
+func New(opts *EngineOpts) Engine <span class="cov10" title="2">{
+        eng := &amp;engine{
+                app:   opts.Engine,
+                cfg:   opts.Cfg,
+                redis: opts.Redis,
+                db:    opts.SqlDB,
+        }
+        eng.initRoutes()
+
+        return eng
+}</span>
+
 type engine struct {
         app   *gin.Engine
         cfg   *Config
@@ -177,7 +204,7 @@ func (e *engine) Start() error <span class="cov0" title="0">{
 }</span>
 
 // ServeHTTP implements the http.Handler interface to handle HTTP requests, to serve a specific request for testing purpose
-func (e *engine) ServeHTTP(w http.ResponseWriter, req *http.Request) <span class="cov0" title="0">{
+func (e *engine) ServeHTTP(w http.ResponseWriter, req *http.Request) <span class="cov10" title="2">{
         e.app.ServeHTTP(w, req)
 }</span>
 
@@ -187,7 +214,7 @@ type handlers struct {
         userHandler        userHld.Handler
 }
 
-func (e *engine) initHandlers() *handlers <span class="cov0" title="0">{
+func (e *engine) initHandlers() *handlers <span class="cov10" title="2">{
         healthCheckRepo := repository.NewHealthCheck(e.redis)
         shortenUrlRepo := repository.NewUrlStorage(e.redis)
 
@@ -209,7 +236,7 @@ func (e *engine) initHandlers() *handlers <span class="cov0" title="0">{
 }</span>
 
 // initRoutes initializes the routes
-func (e *engine) initRoutes() <span class="cov0" title="0">{
+func (e *engine) initRoutes() <span class="cov10" title="2">{
         // genpass svc, handle and route
         //genPassSvc := service.NewGenPass()
         //genPassHandler := handler.NewGenPass(genPassSvc)
@@ -240,7 +267,7 @@ func (e *engine) initRoutes() <span class="cov0" title="0">{
         e.app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
         v1Routes := e.app.Group("/v1")
-        </span><span class="cov0" title="0">{ //link routes
+        </span><span class="cov10" title="2">{ //link routes
                 v1Routes.POST("/links/shorten", allHandlers.linkHandler.ShortenUrl)
                 v1Routes.GET("/links/redirect/:code", allHandlers.linkHandler.Redirect)
 
@@ -269,7 +296,7 @@ type healthCheckHandler struct {
         //cfg                *config.Config
 }
 
-func NewHealthCheck(healthCheckSvc service.HealthCheck) HealthCheck <span class="cov0" title="0">{
+func NewHealthCheck(healthCheckSvc service.HealthCheck) HealthCheck <span class="cov10" title="2">{
         return &amp;healthCheckHandler{
                 healthCheckSvc: healthCheckSvc,
         }
@@ -321,7 +348,7 @@ type shortenUrlHandler struct {
         shortenUrlService service.ShortenUrl
 }
 
-func NewShortenUrlHandler(shortenUrlSvc service.ShortenUrl) ShortenUrl <span class="cov10" title="2">{
+func NewShortenUrlHandler(shortenUrlSvc service.ShortenUrl) ShortenUrl <span class="cov10" title="4">{
         return &amp;shortenUrlHandler{
                 shortenUrlService: shortenUrlSvc,
         }
@@ -366,14 +393,14 @@ func (h *shortenUrlHandler) ShortenUrl(c *gin.Context) <span class="cov0" title=
 // @Param code path string true "code"
 // @Success        302
 // @Router /links/shorten/{code} [get]
-func (h *shortenUrlHandler) Redirect(c *gin.Context) <span class="cov10" title="2">{
+func (h *shortenUrlHandler) Redirect(c *gin.Context) <span class="cov5" title="2">{
         code := c.Param("code")
         if code == "" </span><span class="cov0" title="0">{
                 c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "code is required"})
         }</span>
 
         // call service to get url from code
-        <span class="cov10" title="2">url, err := h.shortenUrlService.GetURL(c, code)
+        <span class="cov5" title="2">url, err := h.shortenUrlService.GetURL(c, code)
         if err != nil </span><span class="cov0" title="0">{
                 if errors.Is(err, service.UrlNotFound) </span><span class="cov0" title="0">{
                         c.JSON(http.StatusBadRequest, gin.H{"error": "url not found"})
@@ -385,7 +412,7 @@ func (h *shortenUrlHandler) Redirect(c *gin.Context) <span class="cov10" title="
         }
 
         // redirect to url
-        <span class="cov10" title="2">c.Redirect(http.StatusFound, url)</span>
+        <span class="cov5" title="2">c.Redirect(http.StatusFound, url)</span>
 
 }
 </pre>
@@ -405,7 +432,7 @@ type userHandler struct {
         service user.Service
 }
 
-func NewHandler(service user.Service) Handler <span class="cov0" title="0">{
+func NewHandler(service user.Service) Handler <span class="cov10" title="2">{
         return &amp;userHandler{service: service}
 }</span>
 </pre>
@@ -414,6 +441,7 @@ func NewHandler(service user.Service) Handler <span class="cov0" title="0">{
 
 import (
         "net/http"
+        "strings"
 
         "github.com/gin-gonic/gin"
 )
@@ -434,22 +462,32 @@ type registerInput struct {
 // @Param input body registerInput true "User registration input"
 // @Success 200 {object} object{data=model.User,message=string} "Success"
 // @Router /v1/users/register [post]
-func (h *userHandler) Register(c *gin.Context) <span class="cov0" title="0">{
+func (h *userHandler) Register(c *gin.Context) <span class="cov10" title="2">{
         input := &amp;registerInput{}
         if err := c.ShouldBindJSON(input); err != nil </span><span class="cov0" title="0">{
                 //c.JSON(http.StatusBadRequest, response.InputFieldError(err))
                 c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-
                 return
         }</span>
 
-        <span class="cov0" title="0">user, err := h.service.CreateUser(c, input.DisplayName, input.Username, input.Password, input.Email)
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov10" title="2">user, err := h.service.CreateUser(c, input.DisplayName, input.Username, input.Password, input.Email)
+        if err != nil </span><span class="cov1" title="1">{
                 //c.JSON(http.StatusInternalServerError, response.InternalErrResponse)
-                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-                return
-        }</span>
-        <span class="cov0" title="0">c.JSON(http.StatusOK, user)</span>
+                if strings.Contains(err.Error(), "UNIQUE constraint failed: users.username") </span><span class="cov0" title="0">{
+                        c.JSON(http.StatusBadRequest, gin.H{"message": "Field users.username already exist"})
+                        return
+                }</span>
+                <span class="cov1" title="1">if strings.Contains(err.Error(), "UNIQUE constraint failed: users.email") </span><span class="cov1" title="1">{
+                        c.JSON(http.StatusBadRequest, gin.H{"message": "Field users.email already exist"})
+                        return
+                }</span>
+                <span class="cov0" title="0">c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+                return</span>
+        }
+        <span class="cov1" title="1">c.JSON(http.StatusOK, gin.H{
+                "data":    user,
+                "message": "Register an user successfully",
+        })</span>
 }
 </pre>
 		
@@ -468,11 +506,11 @@ type User struct {
         Email       string `gorm:"unique;column:email" json:"email"`
 }
 
-func (u *User) BeforeCreate(tx *gorm.DB) (err error) <span class="cov10" title="2">{
-        if u.ID == "" </span><span class="cov0" title="0">{
+func (u *User) BeforeCreate(tx *gorm.DB) (err error) <span class="cov10" title="4">{
+        if u.ID == "" </span><span class="cov5" title="2">{
                 u.ID = uuid.New().String()
         }</span>
-        <span class="cov10" title="2">return</span>
+        <span class="cov10" title="4">return</span>
 }
 </pre>
 		
@@ -495,7 +533,7 @@ type healthCheckRepo struct {
 }
 
 // NewHealthCheck creates a new HealthCheck
-func NewHealthCheck(c *redis.Client) HealthCheck <span class="cov0" title="0">{
+func NewHealthCheck(c *redis.Client) HealthCheck <span class="cov10" title="2">{
         return &amp;healthCheckRepo{
                 c: c,
         }
@@ -534,17 +572,17 @@ type urlStorage struct {
 }
 
 // NewUrlStorage creates a new UrlStorage
-func NewUrlStorage(c *redis.Client) UrlStorage <span class="cov8" title="1">{
+func NewUrlStorage(c *redis.Client) UrlStorage <span class="cov10" title="3">{
         return &amp;urlStorage{c: c}
 }</span>
 
 // StoreURL stores a URL in the cache
-func (s *urlStorage) StoreURL(ctx context.Context, code, url string, exp time.Duration) error <span class="cov8" title="1">{
+func (s *urlStorage) StoreURL(ctx context.Context, code, url string, exp time.Duration) error <span class="cov1" title="1">{
         err := s.c.Set(ctx, code, url, exp).Err()
         if err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
-        <span class="cov8" title="1">return nil</span>
+        <span class="cov1" title="1">return nil</span>
 }
 
 // GetURL retrieves a URL from the cache
@@ -566,7 +604,7 @@ import (
         "github.com/viettrung2103/bookmark-management-lesson/internal/app/model"
 )
 
-func (r *userRepo) CreateUser(ctx context.Context, user *model.User) error <span class="cov10" title="2">{
+func (r *userRepo) CreateUser(ctx context.Context, user *model.User) error <span class="cov10" title="4">{
         return r.db.WithContext(ctx).Create(user).Error
 }</span>
 </pre>
@@ -590,7 +628,7 @@ type userRepo struct {
 }
 
 // NewRepository returns a new repository
-func NewRepository(db *gorm.DB) Repository <span class="cov10" title="2">{
+func NewRepository(db *gorm.DB) Repository <span class="cov10" title="4">{
         return &amp;userRepo{db: db}
 }</span>
 </pre>
@@ -615,7 +653,7 @@ type healthCheckService struct {
 }
 
 // NewHealthCheckS creates a new HealthCheck
-func NewHealthCheck(repo repository.HealthCheck) HealthCheck <span class="cov0" title="0">{
+func NewHealthCheck(repo repository.HealthCheck) HealthCheck <span class="cov10" title="2">{
         return &amp;healthCheckService{repo: repo}
 }</span>
 
@@ -687,7 +725,7 @@ type shortenUrlService struct {
 }
 
 // NewShortenUrl returns a new ShortenUrl
-func NewShortenUrl(repo repository.UrlStorage, keygen utils.KeyGenerator) ShortenUrl <span class="cov10" title="5">{
+func NewShortenUrl(repo repository.UrlStorage, keygen utils.KeyGenerator) ShortenUrl <span class="cov10" title="7">{
         return &amp;shortenUrlService{
                 repo:   repo,
                 keygen: keygen,
@@ -699,7 +737,7 @@ const (
 )
 
 // ShortenUrl shortens a url
-func (s *shortenUrlService) ShortenUrl(ctx context.Context, url string, exp int64) (string, error) <span class="cov7" title="3">{
+func (s *shortenUrlService) ShortenUrl(ctx context.Context, url string, exp int64) (string, error) <span class="cov6" title="3">{
         // tao key
         key := s.keygen.GenerateKey(urlCodeLength)
 
@@ -709,7 +747,7 @@ func (s *shortenUrlService) ShortenUrl(ctx context.Context, url string, exp int6
                 return "", err
         }</span>
 
-        <span class="cov7" title="3">if res != "" </span><span class="cov1" title="1">{
+        <span class="cov6" title="3">if res != "" </span><span class="cov1" title="1">{
                 return s.ShortenUrl(ctx, url, exp)
         }</span>
 
@@ -723,13 +761,13 @@ func (s *shortenUrlService) ShortenUrl(ctx context.Context, url string, exp int6
 
 var ErrCodeDoesNotExist = errors.New("code does not exist")
 
-func (s *shortenUrlService) GetLinkFromCode(ctx context.Context, urlCode string) (string, error) <span class="cov7" title="3">{
+func (s *shortenUrlService) GetLinkFromCode(ctx context.Context, urlCode string) (string, error) <span class="cov6" title="3">{
         url, err := s.repo.GetURL(ctx, urlCode)
         if errors.Is(err, redis.Nil) </span><span class="cov0" title="0">{
                 return "", ErrCodeDoesNotExist
         }</span>
 
-        <span class="cov7" title="3">return url, err</span>
+        <span class="cov6" title="3">return url, err</span>
 }
 
 var (
@@ -759,7 +797,7 @@ import (
         "github.com/viettrung2103/bookmark-management-lesson/pkg/utils"
 )
 
-func (s *userService) CreateUser(ctx context.Context, displayName, username, password, email string) (*model.User, error) <span class="cov0" title="0">{
+func (s *userService) CreateUser(ctx context.Context, displayName, username, password, email string) (*model.User, error) <span class="cov10" title="2">{
         hashedPwd := utils.Hastring(password)
 
         user := &amp;model.User{
@@ -770,10 +808,10 @@ func (s *userService) CreateUser(ctx context.Context, displayName, username, pas
         }
 
         err := s.repo.CreateUser(ctx, user)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov1" title="1">{
                 return nil, err
         }</span>
-        <span class="cov0" title="0">return user, nil</span>
+        <span class="cov1" title="1">return user, nil</span>
 }
 </pre>
 		
@@ -794,12 +832,123 @@ type userService struct {
         repo user.Repository
 }
 
-func NewService(repo user.Repository) Service <span class="cov0" title="0">{
+func NewService(repo user.Repository) Service <span class="cov10" title="2">{
         return &amp;userService{repo: repo}
 }</span>
 </pre>
 		
-		<pre class="file" id="file15" style="display: none">package logger
+		<pre class="file" id="file15" style="display: none">package common
+
+func HandleError(err error) <span class="cov0" title="0">{
+        if err != nil </span><span class="cov0" title="0">{
+                panic(err)</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file16" style="display: none">package jwtutils
+
+import (
+        "crypto/rsa"
+        "os"
+
+        "github.com/golang-jwt/jwt/v5"
+)
+
+//go:generate mockery --name JEWGenerator --filename generator.go
+
+type JWTGenerator interface {
+        GenerateJWT(jwtContent jwt.MapClaims) (string, error)
+}
+
+type generator struct {
+        privateKey *rsa.PrivateKey
+}
+
+func NewJWTGenerator(privateKeyPath string) (JWTGenerator, error) <span class="cov10" title="7">{
+        privateKeyData, err := os.ReadFile(privateKeyPath)
+        if err != nil </span><span class="cov4" title="2">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="5">privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(privateKeyData)
+        if err != nil </span><span class="cov4" title="2">{
+                return nil, err
+        }</span>
+
+        <span class="cov6" title="3">return &amp;generator{
+                privateKey: privateKey,
+        }, nil</span>
+}
+
+func (g *generator) GenerateJWT(jwtContent jwt.MapClaims) (string, error) <span class="cov1" title="1">{
+        token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwtContent)
+        tokenString, err := token.SignedString(g.privateKey)
+
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+        <span class="cov1" title="1">return tokenString, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file17" style="display: none">package jwtutils
+
+import (
+        "crypto/rsa"
+        "errors"
+        "os"
+
+        "github.com/golang-jwt/jwt/v5"
+)
+
+var (
+        ErrInvalidToken = errors.New("invalid token")
+        ErrExtractToken = errors.New("failed to extract token")
+)
+
+type JWTValidator interface {
+        ValidateJWT(tokenStr string) (jwt.MapClaims, error)
+}
+
+type validator struct {
+        publicKey *rsa.PublicKey
+}
+
+func NewJWTValidator(publicKeyPath string) (JWTValidator, error) <span class="cov8" title="1">{
+        publicKeyData, err := os.ReadFile(publicKeyPath)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">publicKey, err := jwt.ParseRSAPublicKeyFromPEM(publicKeyData)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return &amp;validator{
+                publicKey: publicKey,
+        }, nil</span>
+
+}
+
+func (v *validator) ValidateJWT(tokenStr string) (jwt.MapClaims, error) <span class="cov8" title="1">{
+        token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (any, error) </span><span class="cov8" title="1">{
+                return v.publicKey, nil
+        }</span>)
+
+        <span class="cov8" title="1">if err != nil || !token.Valid </span><span class="cov0" title="0">{
+                return nil, ErrInvalidToken
+        }</span>
+
+        <span class="cov8" title="1">if claims, ok := token.Claims.(jwt.MapClaims); ok </span><span class="cov8" title="1">{
+                return claims, nil
+        }</span>
+
+        <span class="cov0" title="0">return nil, ErrExtractToken</span>
+}
+</pre>
+		
+		<pre class="file" id="file18" style="display: none">package logger
 
 import (
         "os"
@@ -816,7 +965,7 @@ func SetLogLevel() <span class="cov0" title="0">{
 }
 </pre>
 		
-		<pre class="file" id="file16" style="display: none">package redis
+		<pre class="file" id="file19" style="display: none">package redis
 
 import "github.com/redis/go-redis/v9"
 
@@ -837,7 +986,7 @@ func NewClient(envPrefix string) (*redis.Client, error) <span class="cov0" title
 }
 </pre>
 		
-		<pre class="file" id="file17" style="display: none">package redis
+		<pre class="file" id="file20" style="display: none">package redis
 
 import (
         "testing"
@@ -855,7 +1004,7 @@ func InitMockRedis(t *testing.T) *redis.Client <span class="cov8" title="1">{
 }</span>
 </pre>
 		
-		<pre class="file" id="file18" style="display: none">package sqldb
+		<pre class="file" id="file21" style="display: none">package sqldb
 
 import (
         "gorm.io/driver/postgres"
@@ -877,7 +1026,7 @@ func NewClient(envPrefix string) (*gorm.DB, error) <span class="cov0" title="0">
 }
 </pre>
 		
-		<pre class="file" id="file19" style="display: none">package sqldb
+		<pre class="file" id="file22" style="display: none">package sqldb
 
 import (
         "fmt"
@@ -889,7 +1038,7 @@ import (
         "gorm.io/gorm/logger"
 )
 
-func CreateTestDb(t *testing.T) *gorm.DB <span class="cov10" title="2">{
+func CreateTestDb(t *testing.T) *gorm.DB <span class="cov10" title="4">{
         cxn := fmt.Sprintf("file:%s?mode=memory&amp;cache=shared", uuid.New().String())
         db, err := gorm.Open(sqlite.Open(cxn), &amp;gorm.Config{
                 Logger: logger.Default.LogMode(logger.Silent),
@@ -897,11 +1046,11 @@ func CreateTestDb(t *testing.T) *gorm.DB <span class="cov10" title="2">{
         if err != nil </span><span class="cov0" title="0">{
                 t.Fatalf("failed to create test db: %v", err)
         }</span>
-        <span class="cov10" title="2">return db</span>
+        <span class="cov10" title="4">return db</span>
 }
 </pre>
 		
-		<pre class="file" id="file20" style="display: none">package utils
+		<pre class="file" id="file23" style="display: none">package utils
 
 import (
         "bytes"
@@ -922,7 +1071,7 @@ type randomStringGenerator struct {
         rng *rand.Rand
 }
 
-func NewKeyGenerator() KeyGenerator <span class="cov0" title="0">{
+func NewKeyGenerator() KeyGenerator <span class="cov3" title="2">{
         return &amp;randomStringGenerator{
                 rng: rand.New(rand.NewSource(time.Now().UnixNano())),
         }
@@ -952,11 +1101,11 @@ func randomString(rng *rand.Rand, length int) string <span class="cov1" title="1
 }
 </pre>
 		
-		<pre class="file" id="file21" style="display: none">package utils
+		<pre class="file" id="file24" style="display: none">package utils
 
 import "golang.org/x/crypto/bcrypt"
 
-func Hastring(input string) string <span class="cov0" title="0">{
+func Hastring(input string) string <span class="cov10" title="2">{
 
         hashedBytes, _ := bcrypt.GenerateFromPassword([]byte(input), bcrypt.DefaultCost)
         return string(hashedBytes)
