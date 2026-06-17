@@ -146,5 +146,4 @@ func (e *engine) initRoutes() {
 		//user routes
 		v1Routes.POST("/users/register", allHandlers.userHandler.Register)
 	}
-
 }
